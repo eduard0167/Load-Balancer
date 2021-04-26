@@ -6,10 +6,6 @@
 #include "load_balancer.h"
 #include "utils.h"
 
-#define REQUEST_LENGTH 1024
-#define KEY_LENGTH 128
-#define VALUE_LENGTH 65536
-
 void get_key_value(char* key, char* value, char* request) {
 	int key_start = 0, value_start = 0;
 	int key_finish = 0, value_finish = 0;

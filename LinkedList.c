@@ -53,10 +53,6 @@ void ll_add_nth_node(linked_list_t* list, unsigned int n, const void* new_data)
 {
     if (!list) {
         return ;
-    } 
-
-    if (n < 0) {
-        return;
     }
 
     //  add on the first position
@@ -128,10 +124,6 @@ static ll_node_t *ll_remove_last_node(linked_list_t *list) {
 ll_node_t* ll_remove_nth_node(linked_list_t* list, unsigned int n)
 {
     if (!list) {
-        return NULL;
-    }
-
-    if (n < 0) {
         return NULL;
     }
 

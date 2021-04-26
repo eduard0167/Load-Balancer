@@ -1,10 +1,11 @@
 # MITROI EDUARD IONUT 312CA
-CC=clang
+CC=gcc
 CFLAGS=-Wall -Wextra -std=c99
 
-build: tema2 clean
+.PHONY: build clean
+build: exec clean
 
-tema2: main.o Hashtable.o LinkedList.o load_balancer.o server.o Extra.o
+exec: main.o Hashtable.o LinkedList.o load_balancer.o server.o Extra.o
 	$(CC) $(CFLAGS) -Wall -Wextra main.o Hashtable.o LinkedList.o load_balancer.o server.o Extra.o -o tema2
 
 main.o: main.c

@@ -173,10 +173,10 @@ void ht_remove_entry(hashtable_t *ht, void *key)
 	while (curr) {
 		if (ht->compare_function(((info_t *)curr->data)->key, key) == 0) {
 			ll_node_t *remove = ll_remove_nth_node(ht->buckets[index], count);
-			//free(((info_t *)remove->data)->key);
-			//free(((info_t *)remove->data)->value);
-			//free(remove->data);
-			//free(remove);
+			free(((info_t *)remove->data)->key);
+			free(((info_t *)remove->data)->value);
+			free(remove->data);
+			free(remove);
 			
 			ht->size--;
 			return;

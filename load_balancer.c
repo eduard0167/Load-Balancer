@@ -51,28 +51,43 @@ static void reallocate_objects(load_balancer_t *main, int server_id, unsigned in
         return;
     }
     unsigned int server_hash = hash_function_servers(&server_tag);
-    int i = binary_search(main->hash_ring, main->num_servers, 0, main->num_servers - 1, server_hash);
-    int id = main->hash_ring[i] % MAX_SERVERS;
-    if (id == server_id) {    // if is the same id, is not necessary to change
+    int pos = binary_search(main->hash_ring, main->num_servers, 0, main->num_servers - 1, server_hash);
+    unsigned int next_id = main->hash_ring[pos] % MAX_SERVERS;
+    if (server_tag % MAX_SERVERS == next_id) {
         return;
     }
-    
-    int hmax = main->servers[id]->memory->hmax;
+
+    int prev;
+    if (pos != 0) {
+        prev = pos - 1; 
+    } else {
+        prev = main->num_servers - 1;
+    }
+
+    int hmax = main->servers[next_id]->memory->hmax;
     for (int j = 0; j < hmax; j++) {
-        if (main->servers[id]->memory->buckets[j]) {
-            ll_node_t *curr = main->servers[id]->memory->buckets[j]->head;
-            while (curr) {
-                char *key = (char*)(((info_t*)curr->data)->key);
-                unsigned int index_key = hash_function_key(key);
-                printf("\n%x %x\n", index_key, server_hash);
-                if (index_key < server_hash) {
-                    char *value = (char*)((info_t*)curr->data)->value;
-                    server_remove(main->servers[id], key);
-                    server_store(main->servers[server_id], key, value);
-                }
+        ll_node_t *curr = main->servers[next_id]->memory->buckets[j]->head;
+
+        while (curr) {
+            char *key = (char*)(((info_t*)curr->data)->key);
+            char key_copy[KEY_LENGTH] = {0};
+            memcpy(key_copy, key, strlen(key)+1);
+            unsigned int key_hash = hash_function_key(key);
+
+            if (key_hash < server_hash && key_hash > hash_function_servers(&main->hash_ring[prev])) {
+                char *value = (char*)(((info_t*)curr->data)->value);
+                char value_copy[VALUE_LENGTH] = {0};
+                memcpy(value_copy, value, strlen(value) + 1);
 
                 curr = curr->next;
+
+                server_remove(main->servers[next_id], key_copy);
+                server_store(main->servers[server_id], key_copy, value_copy);
+
+                continue;
             }
+
+            curr = curr->next;
         }
     }
 }
@@ -98,8 +113,76 @@ void loader_add_server(load_balancer_t* main, int server_id) {
 }
 
 
+static void reallocate_remove(load_balancer_t *main, int server_id, unsigned int server_tag) {
+    if (main->num_servers <= 3) {
+        return;
+    }
+
+    unsigned int server_hash = hash_function_servers(&server_tag);
+    int pos = binary_search(main->hash_ring, main->num_servers, 0, main->num_servers - 1, server_hash);
+    unsigned int next_id = main->hash_ring[pos] % MAX_SERVERS;
+    server_hash = hash_function_servers(&main->hash_ring[pos]);
+    if (server_tag % MAX_SERVERS == next_id) {
+        return;
+    }
+    
+    int prev;
+    if (pos != 0) {
+        prev = pos - 1; 
+    } else {
+        prev = main->num_servers - 1;
+    }
+
+    int hmax = main->servers[server_id]->memory->hmax;
+    for (int j = 0; j < hmax; j++) {
+        ll_node_t *curr = main->servers[server_id]->memory->buckets[j]->head;
+
+        while (curr) {
+            char *key = (char*)(((info_t*)curr->data)->key);
+            char key_copy[KEY_LENGTH] = {0};
+            memcpy(key_copy, key, strlen(key)+1);
+            unsigned int key_hash = hash_function_key(key);
+            
+            if (key_hash < server_hash && key_hash > hash_function_servers(&main->hash_ring[prev])) {
+                char *value = (char*)(((info_t*)curr->data)->value);
+                char value_copy[VALUE_LENGTH] = {0};
+                memcpy(value_copy, value, strlen(value) + 1);
+
+                curr = curr->next;
+
+                server_remove(main->servers[server_id], key_copy);
+                server_store(main->servers[next_id], key_copy, value_copy);
+
+                continue;
+            }
+
+            curr = curr->next;
+        }
+    }
+}
+
 void loader_remove_server(load_balancer_t* main, int server_id) {
-	/* TODO. */
+    if (!main) {
+        fprintf(stderr, "Error: Load balancer hasn't been allocated\n");
+        return;
+    }
+
+    unsigned int hash_server = hash_function_servers(&server_id);
+    remove_in_order(main->hash_ring, &main->num_servers, hash_server);
+    reallocate_remove(main, server_id, server_id);
+    
+    unsigned int replica1_tag = server_id + ID_REP;
+    unsigned int hash_rep1 = hash_function_servers(&replica1_tag);
+    remove_in_order(main->hash_ring, &main->num_servers, hash_rep1);
+    reallocate_remove(main, server_id, replica1_tag);
+
+    unsigned int replica2_tag = server_id + 2 * ID_REP; 
+    unsigned int hash_rep2 = hash_function_servers(&replica2_tag);
+    remove_in_order(main->hash_ring, &main->num_servers, hash_rep2);
+    reallocate_remove(main, server_id, replica2_tag);
+
+    free_server_memory(main->servers[server_id]);
+    main->servers[server_id] = NULL;
 }
 
 void free_load_balancer(load_balancer_t* main) {

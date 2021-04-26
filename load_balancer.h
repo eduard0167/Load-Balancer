@@ -5,6 +5,10 @@
 #include "server.h"
 #include "Extra.h"
 
+#define REQUEST_LENGTH 1024
+#define KEY_LENGTH 128
+#define VALUE_LENGTH 65536
+
 #define MAX_SERVERS 100000
 #define MAX_HASH 300000
 #define ID_REP 100000
