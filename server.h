@@ -7,7 +7,6 @@
 typedef struct server_memory server_memory;
 
 struct server_memory {
-	/* TODO */
 	hashtable_t *memory;
 	unsigned int id_server;
 };

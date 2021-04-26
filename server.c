@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "server.h"
-
+#include "utils.h"
 #define MAX_ELEM 1024
 
 server_memory* init_server_memory() {
@@ -11,7 +11,7 @@ server_memory* init_server_memory() {
 	DIE(!server, "Erroc in malloc() for server\n");
 
 	server->memory = ht_create(MAX_ELEM, hash_function_key, compare_function_strings);
-	return NULL;
+	return server;
 }
 
 void server_store(server_memory* server, char* key, char* value) {

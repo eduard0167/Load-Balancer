@@ -1,7 +1,3 @@
-/*
- * Hashtable.h
- * Alexandru-Cosmin Mihai
- */
 #ifndef __HASHTABLE_H
 #define __HASHTABLE_H
 
@@ -18,14 +14,14 @@ struct hashtable_t {
 	linked_list_t **buckets; /* Array de liste simplu-inlantuite. */
 	/* Nr. total de noduri existente curent in toate bucket-urile. */
 	unsigned int size;
-	unsigned int hmax; /* Nr. de bucket-uri. */
+	int hmax; /* Nr. de bucket-uri. */
 	/* (Pointer la) Functie pentru a calcula valoarea hash asociata cheilor. */
 	unsigned int (*hash_function)(void*);
 	/* (Pointer la) Functie pentru a compara doua chei. */
 	int (*compare_function)(void*, void*);
 };
 
-hashtable_t *ht_create(unsigned int hmax, unsigned int (*hash_function)(void*),
+hashtable_t *ht_create(int hmax, unsigned int (*hash_function)(void*),
 		int (*compare_function)(void*, void*));
 
 void ht_put(hashtable_t *ht, void *key, unsigned int key_size,

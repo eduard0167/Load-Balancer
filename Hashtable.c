@@ -1,8 +1,3 @@
-/*
- * Hashtable.c
- * Alexandru-Cosmin Mihai
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -64,7 +59,7 @@ unsigned int hash_function_key(void *a) {
  * Functie apelata dupa alocarea unui hashtable pentru a-l initializa.
  * Trebuie alocate si initializate si listele inlantuite.
  */
-hashtable_t *ht_create(unsigned int hmax, unsigned int (*hash_function)(void*),
+hashtable_t *ht_create(int hmax, unsigned int (*hash_function)(void*),
 		int (*compare_function)(void*, void*))
 {
 	hashtable_t *ht = malloc(sizeof(hashtable_t));
@@ -178,10 +173,10 @@ void ht_remove_entry(hashtable_t *ht, void *key)
 	while (curr) {
 		if (ht->compare_function(((info_t *)curr->data)->key, key) == 0) {
 			ll_node_t *remove = ll_remove_nth_node(ht->buckets[index], count);
-			free(((info_t *)remove->data)->key);
-			free(((info_t *)remove->data)->value);
-			free(remove->data);
-			free(remove);
+			//free(((info_t *)remove->data)->key);
+			//free(((info_t *)remove->data)->value);
+			//free(remove->data);
+			//free(remove);
 			
 			ht->size--;
 			return;

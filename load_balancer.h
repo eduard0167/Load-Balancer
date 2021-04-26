@@ -3,13 +3,16 @@
 #define LOAD_BALANCER_H_
 
 #include "server.h"
+#include "Extra.h"
+
+#define MAX_SERVERS 100000
+#define MAX_HASH 300000
+#define ID_REP 100000
 
 typedef struct load_balancer {
   server_memory **servers;
-  unsigned int **hash_ring;
-  unsigned int num_servers;
-  unsigned int (*hash_function_servers)(void*);
-  unsigned int (*hash_function_key)(void*);
+  unsigned int *hash_ring;
+  int num_servers;
 } load_balancer_t;
 
 
