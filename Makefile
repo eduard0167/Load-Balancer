@@ -3,7 +3,7 @@ CC=gcc
 CFLAGS=-Wall -Wextra -std=c99
 
 .PHONY: build clean
-build: exec clean
+build: exec
 
 exec: main.o Hashtable.o LinkedList.o load_balancer.o server.o Array.o
 	$(CC) $(CFLAGS) -Wall -Wextra main.o Hashtable.o LinkedList.o load_balancer.o server.o Array.o -o tema2

@@ -4,21 +4,31 @@
 
 #include "load_balancer.h"
 
+/*
+ *  Functia initilizeaza memoria pentru load balancer si paramatrii sai:
+ *  array-ul de servere, hash ring (array care retine etichetele replicilor)
+ *  si initializeaza cu 0 numarul serverelor (va creste pentru fiecare server
+ *  cu 3, retinand in realitate numarul de elemente din hash ring/de replici).
+*/
 load_balancer_t* init_load_balancer() {
-	load_balancer_t *main = malloc(sizeof(*main));
-    DIE(!main, "Error in malloc() for load balancer\n");
+	load_balancer_t *main_lb = malloc(sizeof(*main_lb));
+    DIE(!main_lb, "Error in malloc() for load balancer\n");
 
-    main->servers = calloc(MAX_SERVERS, sizeof(server_memory*));
-    DIE(!main, "Error in calloc() for array of servers\n");
+    main_lb->servers = calloc(MAX_SERVERS, sizeof(server_memory*));
+    DIE(!main_lb->servers, "Error in calloc() for array of servers\n");
 
-    main->hash_ring = calloc(MAX_HASH, sizeof(unsigned int));
-    DIE(!main, "Error in calloc() for hash ring\n");
+    main_lb->hash_ring = calloc(MAX_HASH, sizeof(unsigned int));
+    DIE(!main_lb, "Error in calloc() for hash ring\n");
 
-    main->num_servers = 0;
+    main_lb->num_servers = 0;
 
-    return main;
+    return main_lb;
 }
 
+/*
+ *  Stocheaza cheia alaturi de valoarea corespunzatoare in primul serverul al
+ *  carei replici se gaseste pe hashring cu hash mai mare decat cel al cheii.
+*/
 void loader_store(load_balancer_t* main, char* key, char* value,
                     int* server_id) {
     if (!main) {
@@ -38,6 +48,10 @@ void loader_store(load_balancer_t* main, char* key, char* value,
     server_store(main->servers[*server_id], key, value);
 }
 
+/*
+ * Returneaza valoarea elementului care corespunde unei chei date in mod optim,
+ * gasind serverul pe care acesta se afla prin cautare binara in hashring.
+*/
 char* loader_retrieve(load_balancer_t* main, char* key, int* server_id) {
     if (!main) {
         fprintf(stderr, "Error: Load balancer hasn't been allocated\n");
@@ -58,7 +72,14 @@ char* loader_retrieve(load_balancer_t* main, char* key, int* server_id) {
 	return value;
 }
 
-static void reallocate_add(load_balancer_t *main, int pos, unsigned int src_tag,
+/*
+ *  Functia se ocupa de realocarea elementelor dintr-un server src intr-un
+ *  server dest. Pentru a realiza acest lucru, se parcurg toate elemenele
+ *  din serverul sursa si in functie hash-urile cheilor, se face realocarea
+ *  pe serverul destinatie, conditia generala fiind ca hash-ul unei chei sa se
+ *  afle pe hash ring intre serverul prev si dest.
+*/
+static void reallocate(load_balancer_t *main, int pos, unsigned int src_tag,
                             unsigned int dest_tag, unsigned int prev_tag,
                             unsigned int server_hash) {
     unsigned int src_id = src_tag % MAX_SERVERS;
@@ -76,6 +97,7 @@ static void reallocate_add(load_balancer_t *main, int pos, unsigned int src_tag,
             memcpy(key_copy, key, strlen(key)+1);
             unsigned int key_hash = hash_function_key(key);
 
+            // cazul in care prev este ultimul elem, iar dest este primul
             if (pos == 0 && server_hash < hash) {
                 if ((key_hash > prev_hash) || key_hash < server_hash) {
                     char *value = (char*)(((info_t*)curr->data)->value);
@@ -107,6 +129,13 @@ static void reallocate_add(load_balancer_t *main, int pos, unsigned int src_tag,
     }
 }
 
+/*
+ *  Functia de realocare primeste etichate unei replici si gaseste urmatorul
+ *  element din hashring (prin urmare, se obtine si cel anterior). Prin
+ *  parametrul command se realizeaza diferenta dintre adaugarea si eliminarea
+ *  unui server: in functie de acesta, se aleg serverul destinatie si serverul
+ *  sursa. 
+*/
 static void reallocate_objects(load_balancer_t *main,
                                 unsigned int server_tag, int command) {
     if (main->num_servers <= 3) {
@@ -123,21 +152,26 @@ static void reallocate_objects(load_balancer_t *main,
         pos = 0;
     }
 
+    // daca urmatoarea eticheta face parte din acelasi server, nu se realizeaza
+    // realocarea, avand elementele stocate in aceeasi zona de memorie
     unsigned int next_id = main->hash_ring[pos] % MAX_SERVERS;
     if (server_tag % MAX_SERVERS == next_id) {
         return;
     }
 
     if (command == 1) {
-        reallocate_add(main, pos, main->hash_ring[pos], server_tag,
+        reallocate(main, pos, main->hash_ring[pos], server_tag,
                         main->hash_ring[prev], server_hash);
     } else {
-        reallocate_add(main, pos, server_tag, main->hash_ring[pos],
+        reallocate(main, pos, server_tag, main->hash_ring[pos],
                         main->hash_ring[prev], server_hash);
     }
 }
 
-
+/*
+ *  Initializeazaa memoria pentru serverul de pe server_id si adauga pe rand in
+ *  hashring etichetele, inainte realizand realocare pe eticheta respectiva.
+*/
 void loader_add_server(load_balancer_t* main, int server_id) {
     if (!main) {
         fprintf(stderr, "Error: Load balancer hasn't been allocated\n");
@@ -157,6 +191,10 @@ void loader_add_server(load_balancer_t* main, int server_id) {
     insert_in_order(main->hash_ring, MAX_HASH, &(main->num_servers), rep2_tag);
 }
 
+/* 
+ *  Elimina serverul cu id-ul server_id din memoria dupa ce a sters din 
+ *  hashring replicile si a realocata elementele fiecarea pe rand. 
+*/
 void loader_remove_server(load_balancer_t* main, int server_id) {
     if (!main) {
         fprintf(stderr, "Error: Load balancer hasn't been allocated\n");
@@ -181,6 +219,9 @@ void loader_remove_server(load_balancer_t* main, int server_id) {
     main->servers[server_id] = NULL;
 }
 
+/*  
+ *  Functia care elibereaza memoria pentru load balancer si parametriis sai.
+*/
 void free_load_balancer(load_balancer_t* main) {
     free(main->hash_ring);
     for (int i = 0; i < MAX_HASH / 3; i++) {
