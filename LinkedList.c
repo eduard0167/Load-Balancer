@@ -1,10 +1,11 @@
+/* Copyright 2021 Mitroi Eduard Ionut */
 #include "LinkedList.h"
 
 linked_list_t* ll_create(unsigned int data_size)
 {
     linked_list_t *list = malloc(sizeof(linked_list_t));
     list->head = NULL;
-    
+
     list->data_size = data_size;
     list->size = 0;
 
@@ -21,12 +22,12 @@ linked_list_t* ll_create(unsigned int data_size)
 
 static void ll_add_first_node(linked_list_t *list, const void *new_data) {
     ll_node_t *new_head = malloc(sizeof(ll_node_t));
-    
+
     new_head->data = malloc(list->data_size);
     memcpy(new_head->data, new_data, list->data_size);
-    
+
     new_head->next = list->head;
-    list->head = new_head;  
+    list->head = new_head;
 
     list->size++;
 }
@@ -52,17 +53,17 @@ static void ll_add_last_node(linked_list_t *list, const void *new_data) {
 void ll_add_nth_node(linked_list_t* list, unsigned int n, const void* new_data)
 {
     if (!list) {
-        return ;
+        return;
     }
 
     //  add on the first position
-    if (n == 0 || list->size == 0) { 
+    if (n == 0 || list->size == 0) {
         ll_add_first_node(list, new_data);
         return;
     }
 
     // add on the last position
-    if (list->size <= n) { 
+    if (list->size <= n) {
         ll_add_last_node(list, new_data);
         return;
     }
@@ -77,7 +78,7 @@ void ll_add_nth_node(linked_list_t* list, unsigned int n, const void* new_data)
 
     ll_node_t *tmp = curr->next;
     ll_node_t *new_node = malloc(sizeof(ll_node_t));
-    
+
     new_node->data = malloc(list->data_size);
     memcpy(new_node->data, new_data, list->data_size);
     curr->next = new_node;
@@ -161,7 +162,7 @@ unsigned int ll_get_size(linked_list_t* list)
 {
     if (!list) {
         return -1;
-    } 
+    }
     /* If the list doesn't contain its size
     
     ll_node_t *curr = list->head;
@@ -186,20 +187,20 @@ unsigned int ll_get_size(linked_list_t* list)
 void ll_free(linked_list_t** pp_list)
 {
     if (!(*pp_list)) {
-        return ;
-    } 
-    
+        return;
+    }
+
     ll_node_t *curr = (*pp_list)->head;
 
     while (curr) {
         ll_node_t *tmp = curr;
-        
+
         free(curr->data);
         curr = curr->next;
-        
+
         free(tmp);
     }
-    
+
     free(*pp_list);
     *pp_list = NULL;
 }
@@ -212,7 +213,7 @@ void ll_free(linked_list_t** pp_list)
 void ll_print_int(linked_list_t* list)
 {
     if (!list) {
-        return ;
+        return;
     }
 
     ll_node_t *curr = list->head;
@@ -233,8 +234,8 @@ void ll_print_int(linked_list_t* list)
 void ll_print_string(linked_list_t* list)
 {
     if (!list) {
-        return ;
-    } 
+        return;
+    }
     ll_node_t *curr = list->head;
 
     while (curr) {

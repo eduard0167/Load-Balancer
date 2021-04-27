@@ -1,7 +1,9 @@
-#ifndef __HASHTABLE_H
-#define __HASHTABLE_H
+/* Copyright 2021 Mitroi Eduard Ionut */
+#ifndef HASHTABLE_H_
+#define HASHTABLE_H_
 
 #include "LinkedList.h"
+#include "utils.h"
 
 struct info {
 	void *key;
@@ -54,4 +56,4 @@ unsigned int hash_function_servers(void *a);
 
 unsigned int hash_function_key(void *a);
 
-#endif
+#endif  // HASHTABLE_H_

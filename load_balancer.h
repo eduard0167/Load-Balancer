@@ -1,9 +1,11 @@
-/* Copyright 2021 <> */
+/* Copyright 2021 Mitroi Eduard Ionut */
 #ifndef LOAD_BALANCER_H_
 #define LOAD_BALANCER_H_
 
 #include "server.h"
-#include "Extra.h"
+#include "Array.h"
+#include "Hashtable.h"
+#include "utils.h"
 
 #define REQUEST_LENGTH 1024
 #define KEY_LENGTH 128
@@ -36,7 +38,8 @@ void free_load_balancer(load_balancer_t* main);
  * load across the servers. The chosen server ID will be returned 
  * using the last parameter.
  */
-void loader_store(load_balancer_t* main, char* key, char* value, int* server_id);
+void loader_store(load_balancer_t* main, char* key, char* value,
+                    int* server_id);
 
 /**
  * load_retrieve() - Gets a value associated with the key.

@@ -1,5 +1,6 @@
-#ifndef LINKED_LIST_H_
-#define LINKED_LIST_H_
+/* Copyright 2021 Mitroi Eduard Ionut */
+#ifndef LINKEDLIST_H_
+#define LINKEDLIST_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,4 +38,4 @@ void ll_print_string(linked_list_t* list);
 
 ll_node_t *remove_middle(linked_list_t *list);
 
-#endif /* LINKED_LIST_H_ */
+#endif  // LINKEDLIST_H_

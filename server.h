@@ -1,14 +1,14 @@
-/* Copyright 2021 <> */
+/* Copyright 2021 Mitroi Eduard Ionut */
 #ifndef SERVER_H_
 #define SERVER_H_
 
 #include "Hashtable.h"
+#include "utils.h"
 
 typedef struct server_memory server_memory;
 
 struct server_memory {
 	hashtable_t *memory;
-	unsigned int id_server;
 };
 
 server_memory* init_server_memory();

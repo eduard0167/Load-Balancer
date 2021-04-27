@@ -1,16 +1,14 @@
-/* Copyright 2021 <> */
-#include <stdlib.h>
-#include <string.h>
-
+/* Copyright 2021 Mitroi Eduard Ionut */
 #include "server.h"
-#include "utils.h"
+
 #define MAX_ELEM 1024
 
 server_memory* init_server_memory() {
 	server_memory *server = malloc(sizeof(*server));
 	DIE(!server, "Erroc in malloc() for server\n");
 
-	server->memory = ht_create(MAX_ELEM, hash_function_key, compare_function_strings);
+	server->memory = ht_create(MAX_ELEM, hash_function_key,
+															compare_function_strings);
 	return server;
 }
 
@@ -24,7 +22,7 @@ void server_remove(server_memory* server, char* key) {
 
 char* server_retrieve(server_memory* server, char* key) {
 	char *product = ht_get(server->memory, key);
-	
+
 	return product;
 }
 

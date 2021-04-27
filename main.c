@@ -1,4 +1,4 @@
-/* Copyright 2021 <> */
+/* Copyright 2021 Mitroi Eduard Ionut */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -1,7 +1,7 @@
+/* Copyright 2021 Mitroi Eduard Ionut */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "utils.h"
 
 #include "Hashtable.h"
 
@@ -64,7 +64,7 @@ hashtable_t *ht_create(int hmax, unsigned int (*hash_function)(void*),
 {
 	hashtable_t *ht = malloc(sizeof(hashtable_t));
   DIE(!ht, "malloc() for hashtable failed\n");
-	
+
 	ht->buckets = malloc(hmax * sizeof(linked_list_t *));
   DIE(!ht->buckets, "malloc() for buckets failed\n");
 
@@ -77,7 +77,7 @@ hashtable_t *ht_create(int hmax, unsigned int (*hash_function)(void*),
 	ht->size = 0;
 	ht->hash_function = hash_function;
 	ht->compare_function = compare_function;
- 
+
 	return ht;
 }
 
@@ -177,7 +177,7 @@ void ht_remove_entry(hashtable_t *ht, void *key)
 			free(((info_t *)remove->data)->value);
 			free(remove->data);
 			free(remove);
-			
+
 			ht->size--;
 			return;
 		}
